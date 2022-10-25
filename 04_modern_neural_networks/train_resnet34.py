@@ -7,7 +7,8 @@ os.environ["TF_XLA_FLAGS"] = "--tf_xla_auto_jit=2"
 
 import tensorflow as tf
 
-
+losses =[]
+accuracies =[]
 
 #########################################################################
 # Here's the Residual layer from the first half again:
@@ -232,6 +233,10 @@ def train_epoch(i_epoch, step_in_epoch, train_ds, val_ds, network, optimizer, BA
 
         # Peform the training step for this batch
         loss, acc = training_step(network, optimizer, train_images, train_labels)
+        
+        losses.append(loss)
+        accuracies.append(acc)
+        
         end = time.time()
         images_per_second = BATCH_SIZE / (end - start)
         print(f"Finished step {step_in_epoch.numpy()} of {steps_per_epoch} in epoch {i_epoch.numpy()},loss={loss:.3f}, acc={acc:.3f} ({images_per_second:.3f} img/s).")
@@ -340,6 +345,14 @@ def main():
         train_epoch(epoch, step_in_epoch, train_ds, val_ds, network, optimizer, BATCH_SIZE, checkpoint)
         epoch.assign_add(1)
         step_in_epoch.assign(0)
+        
+    # plot
+    plt.figure()
+    plt.subplot(2,1,1)
+    plt.plot(losses)
+    plt.subplot(2,1,2)
+    plt.plot(accuracies)
+    plt.savefig('train_resnet34_losses_accuracies.png')
 
 if __name__ == "__main__":
     main()
